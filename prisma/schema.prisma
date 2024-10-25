@@ -1,0 +1,43 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider          = "sqlite"
+  url               = env("DATABASE_URL")
+  shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model GuildUser {
+  id String @id
+  guildId String
+  level Int @default(1)
+  experience Int @default(0)
+  messageCount Int @default(0)
+  vocalTime Int @default(0)
+}
+
+model Guilds {
+  id String @id
+  prefix String @default("*")
+
+  arrivalChannel String?
+  departureChannel String?
+  announcementChannel String?
+  infoRanksChannel String?
+  communityChannel String?
+  anonymChannel String?
+  autoVocalChannel String?
+
+  mainLogsChannel String?
+  ticketsLogsChannel String?
+  anonymLogsChannel String?
+
+  openTicketsCategory String?
+  closeTicketsCategory String?
+
+  isBetaGuild Boolean @default(false)
+}
