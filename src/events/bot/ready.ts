@@ -1,11 +1,11 @@
 import { Event } from "../../structures/Event";
-import { Client } from "discord.js";
+import { Client, Events } from "discord.js";
 import { Logger } from "../../utils/Logger";
 
 export default class Ready extends Event {
     constructor() {
         super({
-            name: "ready",
+            name: Events.ClientReady,
             once: true,
             enabled: true,
         });
