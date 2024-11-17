@@ -1,4 +1,4 @@
-import { Client, Collection, Interaction } from "discord.js";
+import { Client, Collection, Interaction, REST, Routes } from "discord.js";
 import { readdirSync } from "fs";
 import path from "path";
 import { Command } from "../structures/Command";
@@ -32,6 +32,8 @@ export class CommandHandler {
             "debug"
         );
 
+        await this.deployCommands(client);
+
         client.on("interactionCreate", async (interaction: Interaction) => {
             if (!interaction.isCommand()) return;
 
@@ -47,7 +49,7 @@ export class CommandHandler {
 
             if (command.botOwnerOnly && !botOwners.includes(interaction.user.id)) {
                 return interaction.reply({
-                    content: "Vous n'êtes pas autorisé à utiliser cette commande.",
+                    content: "Vous n'avez pas la permission d'utiliser cette commande.",
                     ephemeral: true,
                 });
             }
@@ -62,5 +64,26 @@ export class CommandHandler {
                 });
             }
         });
+    }
+
+    static async deployCommands(client: Client) {
+        const commands = CommandHandler.commands.map((command) => command.data.toJSON());
+        const rest = new REST({ version: "10" }).setToken(process.env.TOKEN!);
+
+        try {
+            for (const guild of config.betaGuilds) {
+                await rest.put(
+                    Routes.applicationGuildCommands(client.user!.id, guild),
+                    { body: commands }
+                );
+            }
+
+            Logger.consoleLog(
+                `Deployed commands (${commands.length})`,
+                "debug"
+            );
+        } catch (error) {
+            Logger.consoleLog(`Erreur lors du déploiement des commandes: ${error}`, "error");
+        }
     }
 }
