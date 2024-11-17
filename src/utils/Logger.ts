@@ -2,7 +2,7 @@ import chalk = require("chalk")
 import { ChannelType, EmbedBuilder, GuildChannel } from "discord.js";
 import { client } from "..";
 
-type LoggerType = 'info' | 'warn' | 'error' | 'debug';
+type LoggerType = 'info' | 'warn' | 'error' | 'debug' | 'success';
 
 export class Logger {
     /**
@@ -26,6 +26,9 @@ export class Logger {
             case 'debug':
                 console.log(chalk.blue(`[DEBUG] ${chalk.gray(`[${actualDate}]`)} ${message}`));
                 break;
+            case 'success':
+                console.log(chalk.green(`[SUCCESS] ${chalk.gray(`[${actualDate}]`)} ${message}`));
+                break;
             default:
                 console.log(chalk.white(`[INFO] ${chalk.gray(`[${actualDate}]`)} ${message}`));
                 break;
@@ -42,10 +45,10 @@ export class Logger {
     static async channelLog(guildChannel: GuildChannel, logMessage?: string, embed?: EmbedBuilder) {
         const channel = await client.channels.fetch(guildChannel.id);
 
-        if (channel == null) 
+        if (channel == null)
             return this.consoleLog(`Channel with ID ${guildChannel.id} not found`, 'error');
 
-        if (channel.type !== ChannelType.GuildText) 
+        if (channel.type !== ChannelType.GuildText)
             return this.consoleLog(`Channel with ID ${guildChannel.id} is not a text channel`, 'error');
 
         if (embed) {
