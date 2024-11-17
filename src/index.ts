@@ -27,10 +27,10 @@ export const client = new Client({
 (async () => {
     try {
         try {
-            await CommandHandler.loadCommands(client);
             await EventHandler.loadEvents(client);
+            await client.login(process.env.TOKEN);
 
-            client.login(process.env.TOKEN);
+            await CommandHandler.loadCommands(client);
         } catch (error) {
             Logger.consoleLog(`Erreur au démarrage du bot: ${error}`, "error");
             process.exit(1);
