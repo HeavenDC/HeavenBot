@@ -3,6 +3,7 @@ import { SlashCommand } from "../types";
 
 export const command: SlashCommand = {
     name: 'ping',
+    betaGuild: true,
     data: new SlashCommandBuilder()
         .setName("ping")
         .setDescription("Affiche le ping du bot"),

@@ -9,6 +9,7 @@ export interface BotEvent {
 export interface SlashCommand {
     name: string,
     data: SlashCommandBuilder | any,
+    betaGuild?: boolean | false,
     execute: (interaction : CommandInteraction) => Promise<void>,
 }
 
@@ -16,7 +17,8 @@ declare global {
     namespace NodeJS {
         interface ProcessEnv {
             CLIENT_ID: string
-            TOKEN: string
+            TOKEN: string,
+            BETA_GUILDS: string
         }
     }
 }
