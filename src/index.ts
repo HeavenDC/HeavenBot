@@ -1,41 +1,34 @@
-import { Client, GatewayIntentBits } from "discord.js";
-import { config } from "./config";
-import 'dotenv/config';
-import { CommandHandler } from "./handlers/CommandHandler";
-import { EventHandler } from "./handlers/EventHandler";
-import { Logger } from "./utils/Logger";
+import * as dotenv from 'dotenv';
+import { ActivityType, Client, Collection, GatewayIntentBits } from 'discord.js';
+import { SlashCommand } from './types';
+import { join } from 'path';
+import { readdirSync } from 'fs';
 
-export const client = new Client({
+dotenv.config();
+
+const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.GuildPresences,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.MessageContent
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.MessageContent,
     ],
-
     presence: {
-        activities: [{
-            name: config.presence.name,
-            type: config.presence.type
-        }],
-        status: config.presence.status
+        activities: [
+            {
+                name: 'le monde !',
+                type: ActivityType.Watching
+            }
+        ]
     }
 });
 
-(async () => {
-    try {
-        try {
-            await EventHandler.loadEvents(client);
-            await client.login(process.env.TOKEN);
+client.slashCommands = new Collection<string, SlashCommand>();
 
-            await CommandHandler.loadCommands(client);
-        } catch (error) {
-            Logger.consoleLog(`Erreur au démarrage du bot: ${error}`, "error");
-            process.exit(1);
-        }
-    } catch (error) {
-        console.error(error);
-    }
-})();
+const handlersDir = join(__dirname, "./handlers");
+
+readdirSync(handlersDir).forEach(handler => {
+    require(`${handlersDir}/${handler}`)(client);
+});
+
+client.login(process.env.TOKEN);

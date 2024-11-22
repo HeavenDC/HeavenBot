@@ -1,48 +1,20 @@
 import { Client } from "discord.js";
 import { readdirSync } from "fs";
-import path from "path";
-import { Event } from "../structures/Event";
-import { Logger } from "../utils/Logger";
-import { config } from "../config";
+import { join } from "path";
+import { BotEvent } from "../types";
 
-const betaGuilds = config.betaGuilds;
+module.exports = (client: Client) => {
+    let eventsDir = join(__dirname, "../events")
 
-export class EventHandler {
-    static async loadEvents(client: Client) {
-        const eventFolders = readdirSync(path.join(__dirname, "../events"));
+    readdirSync(eventsDir).forEach(file => {
+        if (!file.endsWith(".js")) return;
 
-        for (const folder of eventFolders) {
-            const eventFiles = readdirSync(path.join(__dirname, `../events/${folder}`)).filter(
-                (file) => file.endsWith(".ts") || file.endsWith(".js")
-            );
+        const event: BotEvent = require(`${eventsDir}/${file}`).default;
 
-            for (const file of eventFiles) {
-                const eventModule = await import(`../events/${folder}/${file}`);
-                const event: Event = new eventModule.default();
+        event.once 
+        ? client.once(event.name, (...args) => event.execute(...args)) 
+        : client.on(event.name, (...args) => event.execute(...args));
 
-                if (!event.enabled) continue;
-
-                const execute = async (...args: any[]) => {
-                    const [arg] = args;
-
-                    if (event.betaGuildsOnly && arg.guild && !betaGuilds.includes(arg.guild.id)) {
-                        return;
-                    }
-
-                    await event.run(...args);
-                };
-
-                if (event.once) {
-                    client.once(event.name, execute);
-                } else {
-                    client.on(event.name, execute);
-                }
-            }
-        }
-
-        Logger.consoleLog(
-            `Loaded events (${client.eventNames().length})`,
-            'debug'
-        )
-    }
+        console.log(`🌠 Successfully loaded event ${event.name}`);
+    })
 }
